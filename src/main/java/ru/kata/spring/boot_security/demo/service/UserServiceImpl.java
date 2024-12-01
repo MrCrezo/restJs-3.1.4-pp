@@ -17,6 +17,7 @@ import ru.kata.spring.boot_security.demo.repository.UserRepository;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -72,13 +73,15 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void updateUser(User user) {
-        User existingUser = userRepository.findById(user.getId()).orElseThrow(() ->
-                new IllegalArgumentException("User not found"));
-        if (!existingUser.getPassword().equals(user.getPassword())) {
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-        }
-        user.setRoles(existingUser.getRoles());
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public User getUserByName(String username) {
+        Optional<User> user = Optional.ofNullable(userRepository.findByUsername(username));
+        return user.orElse(null);
     }
 
     @Override
@@ -86,7 +89,7 @@ public class UserServiceImpl implements UserService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = findByUsername(username);
         if (user == null) {
-            throw new UsernameNotFoundException(String.format("User '%' not found", user.getUsername()));
+            throw new UsernameNotFoundException(String.format("User '%S' not found", user.getEmail()));
         }
         return new org.springframework.security.core.userdetails.User(user.getUsername(),
                 user.getPassword(), getAuthority(user.getRoles()));
