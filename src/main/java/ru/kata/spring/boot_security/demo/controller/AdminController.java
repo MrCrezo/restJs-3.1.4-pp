@@ -3,12 +3,16 @@ package ru.kata.spring.boot_security.demo.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.repository.RoleRepository;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
+import javax.validation.Valid;
 import java.security.Principal;
+import java.util.Set;
 
 
 @Controller
@@ -42,8 +46,15 @@ public class AdminController {
     }
 
     @PostMapping()
-    public String createUser(@ModelAttribute("user") User user) {
-        userService.saveUser(user);
+    public String createUser(@ModelAttribute("user") @Valid User user,
+                             BindingResult bindingResult,
+                             @RequestParam(value = "roles") Set<Role> roles,
+                             @ModelAttribute("pass") String pass) {
+
+        if (bindingResult.hasErrors()) {
+            return "admin";
+        }
+        userService.saveUser(user, roles, pass);
         return "redirect:/admin";
     }
 
@@ -55,8 +66,16 @@ public class AdminController {
     }
 
     @PatchMapping("/{id}")
-    public String updateUser(@ModelAttribute("user") User user) {
-        userService.updateUser(user);
+    public String update(@ModelAttribute("user") @Valid User user,
+                         BindingResult bindingResult,
+                         @PathVariable("id") int id,
+                         @RequestParam(value = "roles") Set<Role> roles,
+                         @ModelAttribute("pass") String pass) {
+
+        if (bindingResult.hasErrors()) {
+            return "admin";
+        }
+        userService.updateUser(user, id, roles, pass);
         return "redirect:/admin";
     }
 
