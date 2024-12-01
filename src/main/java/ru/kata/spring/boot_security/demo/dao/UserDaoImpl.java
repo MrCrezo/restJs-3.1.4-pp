@@ -5,7 +5,6 @@ import ru.kata.spring.boot_security.demo.model.User;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import java.util.List;
 
 @Repository
@@ -21,7 +20,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public User getUser(int id) {
-       return entityManager.find(User.class, id) ;
+        return entityManager.find(User.class, id);
     }
 
     @Override
